@@ -1,0 +1,5 @@
+/venv/
+/.idea/
+speed_calculator.py
+window_example.py
+database.db
