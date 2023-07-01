@@ -1,3 +1,4 @@
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QLabel, QWidget, \
     QGridLayout, QLineEdit, QPushButton, QMainWindow, QTableWidget, \
     QTableWidgetItem, QDialog, QVBoxLayout, QComboBox
@@ -19,6 +20,7 @@ class MainWindow(QMainWindow):
         # addMenu adiciona um novo menu na menuBar (seção abaixo do título)
         file_menu_option = self.menuBar().addMenu("&File")
         help_menu_option = self.menuBar().addMenu("&Help")
+        edit_menu_option = self.menuBar().addMenu("&Edit")
 
         # QAction é um item que pode ser incluído no menu, por exemplo:
         # "File > Save as.."
@@ -26,8 +28,12 @@ class MainWindow(QMainWindow):
         file_menu_option.addAction(new_student_action)
         new_student_action.triggered.connect(self.insert_student)
 
-        about_menu_action = QAction("About the program", self)
+        about_menu_action = QAction("About", self)
         help_menu_option.addAction(about_menu_action)
+
+        search_menu_action = QAction("Search", self)
+        edit_menu_option.addAction(search_menu_action)
+        search_menu_action.triggered.connect(self.search_student)
 
         self.table = QTableWidget()  # Tabela de dados
         self.table.setColumnCount(4)  # Determinação do número de colunas
@@ -51,6 +57,10 @@ class MainWindow(QMainWindow):
 
     def insert_student(self):
         dialog = InsertDialog()
+        dialog.exec()
+
+    def search_student(self):
+        dialog = SearchDialog()
         dialog.exec()
 
 
@@ -101,6 +111,46 @@ class InsertDialog(QDialog):
         cursor.close()
         connection.close()
         management_system.load_data()
+
+
+class SearchDialog(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setFixedWidth(300)
+        self.setFixedHeight(100)
+        layout = QVBoxLayout()
+
+        # Widgets
+        name_label = QLabel("<b>Search for:</b>")
+        self.name_line = QLineEdit()
+        self.name_line.setPlaceholderText("Name")
+
+        # Button
+        button = QPushButton("Search")
+        button.clicked.connect(self.search)
+
+        # Setup layout
+
+        layout.addWidget(name_label)
+        layout.addWidget(self.name_line)
+        layout.addWidget(button)
+
+        self.setLayout(layout)
+
+    def search(self):
+        name = self.name_line.text()
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        query = cursor.execute("SELECT * FROM students WHERE name = ?",
+                               (name,))
+        findings = list(query)
+        items = management_system.table.findItems(name,
+                                                  Qt.MatchFlag.MatchFixedString)
+        for item in items:
+            management_system.table.item(item.row(), 1).setSelected(True)
+
+        cursor.close()
+        connection.close()
 
 
 app = QApplication(sys.argv)
