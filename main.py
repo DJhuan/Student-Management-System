@@ -21,8 +21,8 @@ class MainWindow(QMainWindow):
 
         # addMenu adiciona um novo menu na menuBar (seção abaixo do título)
         file_menu_option = self.menuBar().addMenu("&File")
-        help_menu_option = self.menuBar().addMenu("&Help")
         edit_menu_option = self.menuBar().addMenu("&Edit")
+        help_menu_option = self.menuBar().addMenu("&Help")
 
         # QAction é um item que pode ser incluído no menu, por exemplo:
         # "File > Save as.."
@@ -38,6 +38,7 @@ class MainWindow(QMainWindow):
 
         about_menu_action = QAction("About", self)
         help_menu_option.addAction(about_menu_action)
+        about_menu_action.triggered.connect(self.about)
 
         search_menu_action = QAction(QIcon("./icons/search.png"),
                                      "Search", self)
@@ -112,6 +113,10 @@ class MainWindow(QMainWindow):
 
     def close_all(self):
         self.close()
+
+    def about(self):
+        about_dialog = AboutDialog()
+        about_dialog.exec()
 
 class InsertDialog(QDialog):
     def __init__(self):
@@ -293,6 +298,19 @@ class EditDialog(QDialog):
         connection.close()
 
         management_system.load_data()
+
+
+class AboutDialog(QMessageBox):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("About")
+        content = """
+        This app were created during a python course made by Ardit
+        Sulce.
+        You're certainly allowed to edit and use it as you like :)
+        - Jhuan Carlos
+        """
+        self.setText(content)
 
 
 app = QApplication(sys.argv)
